@@ -1,0 +1,17 @@
+{
+    "name": "imagecrop/mehmeteminsayim",
+    "autoload": {
+        "psr-4": {
+            "Imagecrop\\Mehmeteminsayim\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Mehmet Emin Sayım",
+            "email": "55194309+MehmetEminSayim@users.noreply.github.com"
+        }
+    ],
+    "require": {
+        "guzzlehttp/guzzle": "^7.0.1"
+    }
+}
