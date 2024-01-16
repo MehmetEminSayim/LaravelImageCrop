@@ -2,6 +2,7 @@
 namespace Imagecrop\Mehmeteminsayim\Controllers;
 
 use Illuminate\Http\Request;
+use Imagecrop\Mehmeteminsayim\Models\ImageCrop;
 
 class ImageCropController
 {
@@ -15,11 +16,19 @@ class ImageCropController
         ]);
 
         $image = $request->file('image');
+        $size = $image->getSize();
         $filename = time() . '.' . $image->getClientOriginalExtension();
 
         $destinationPath = public_path('uploads');
         $image->move($destinationPath, $filename);
 
-        return response()->json(["status"=> "success","filename"=>$filename]);
+        $image =  ImageCrop::create([
+            "filename" => $filename,
+            "ext" => $image->getClientOriginalExtension(),
+            "folder" => "uploads",
+            "size"=> $size
+        ]);
+
+        return response()->json(["status"=> "success","filename"=>$filename,"record" =>$image]);
     }
 }
