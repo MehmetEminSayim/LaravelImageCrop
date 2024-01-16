@@ -1,31 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Cropping</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+<style>
+    .modal-dialog {
+        max-width: 100%;
+        margin: 1rem;
+    }
 
-    <style>
-        .modal-dialog {
-            max-width: 100%;
-            margin: 1rem;
-        }
+    .img-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 500px;
+        background-color: #f7f7f7;
+        overflow: hidden;
+    }
+</style>
 
-        .img-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            height: 500px;
-            background-color: #f7f7f7;
-            overflow: hidden;
-        }
-    </style>
-</head>
-<body>
 <div class="container">
     <div class="row">
         <div class="col-md-12 mt-5">
@@ -80,7 +69,6 @@
         let cropper;
         let croppedImageDataURL;
 
-        // Initialize the Cropper.js instance when the modal is shown
         $('#cropImageModal').on('shown.bs.modal', function() {
             cropper = new Cropper($('#imageToCrop')[0], {
                 aspectRatio: 1 / 1,
@@ -89,13 +77,11 @@
             });
         });
 
-        // Destroy the Cropper.js instance when the modal is hidden
         $('#cropImageModal').on('hidden.bs.modal', function() {
             cropper.destroy();
             cropper = null;
         });
 
-        // Show the image cropping modal when an image is selected
         $('#image').on('change', function(event) {
             const file = event.target.files[0];
             const fileReader = new FileReader();
@@ -108,17 +94,14 @@
             fileReader.readAsDataURL(file);
         });
 
-        // Handle the "Crop and Upload" button click
         $('#cropAndUpload').on('click', function() {
             croppedImageDataURL = cropper.getCroppedCanvas().toDataURL();
             uploadCroppedImage();
             $('#cropImageModal').modal('hide');
         });
 
-        // Upload the cropped image to the server
         function uploadCroppedImage() {
             let  csrfToken = "{{ csrf_token() }}";;
-
             const formData = new FormData();
             formData.append('_token', csrfToken);
             formData.append('image', dataURLtoFile(croppedImageDataURL, 'cropped-image.png'));
@@ -129,10 +112,8 @@
                     $('#croppedImage').show();
                 }
             })
-
         }
 
-        // Helper function to convert a data URL to a File object
         function dataURLtoFile(dataURL, filename) {
             const arr = dataURL.split(',');
             const mime = arr[0].match(/:(.*?);/)[1];
@@ -148,6 +129,3 @@
         }
     });
 </script>
-
-</body>
-</html>
