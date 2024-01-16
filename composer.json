@@ -15,6 +15,7 @@
             "email": "55194309+MehmetEminSayim@users.noreply.github.com"
         }
     ],
+    "minimum-stability": "dev",
     "require": {
         "php": "^8.1",
         "guzzlehttp/guzzle": "^7.0.1"
