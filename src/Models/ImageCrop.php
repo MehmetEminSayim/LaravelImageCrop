@@ -9,5 +9,11 @@ class ImageCrop extends Model
 {
     use HasFactory;
     protected $table = "imagecrop";
+    protected $fillable = [
+        "filename",
+        "ext",
+        "folder",
+        "size"
+    ];
 
 }

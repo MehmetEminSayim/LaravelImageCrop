@@ -110,6 +110,7 @@
                 if (res.data.status === 'success') {
                     $('#croppedImage').attr('src', '{{ env('APP_UPLOADS_URL') }}/' + res.data.filename);
                     $('#croppedImage').show();
+                    console.log(res.data);
                 }
             })
         }
