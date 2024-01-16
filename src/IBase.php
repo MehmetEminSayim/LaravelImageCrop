@@ -4,7 +4,7 @@ namespace Imagecrop\Mehmeteminsayim;
 
 use Illuminate\Support\Facades\Http;
 
-class Inspire {
+class IBase {
     public function justDoIt() {
         return "test";
     }

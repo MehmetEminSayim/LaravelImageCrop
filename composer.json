@@ -1,10 +1,14 @@
 {
     "name": "imagecrop/mehmeteminsayim",
+    "description": "Laravel image crop",
+    "keywords": ["imagecrop"],
+    "license": "MIT",
     "autoload": {
         "psr-4": {
             "Imagecrop\\Mehmeteminsayim\\": "src/"
         }
     },
+
     "authors": [
         {
             "name": "Mehmet Emin Sayım",
@@ -12,6 +16,7 @@
         }
     ],
     "require": {
+        "php": "^8.1",
         "guzzlehttp/guzzle": "^7.0.1"
     }
 }
