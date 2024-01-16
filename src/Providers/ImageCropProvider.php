@@ -15,5 +15,9 @@ class ImageCropProvider extends ServiceProvider
     {
         $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../views', 'imagecrop');
+
+        $this->publishes([
+            __DIR__.'/../views' => resource_path('views/vendor/imagecrop'),
+        ],'imagecrop-view');
     }
 }
