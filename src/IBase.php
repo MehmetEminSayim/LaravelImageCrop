@@ -5,7 +5,15 @@ namespace Imagecrop\Mehmeteminsayim;
 use Illuminate\Support\Facades\Http;
 
 class IBase {
-    public function justDoIt() {
-        return "test";
+    protected $image;
+
+    public function __construct(Image $image)
+    {
+        $this->image = $image;
+    }
+
+    public function load($pathToImage): void
+    {
+        $this->image->load($pathToImage);
     }
 }

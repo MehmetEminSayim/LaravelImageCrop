@@ -18,6 +18,9 @@
     "minimum-stability": "dev",
     "require": {
         "php": "^8.1",
-        "guzzlehttp/guzzle": "^7.0.1"
+        "guzzlehttp/guzzle": "^7.0.1",
+        "spatie/image": "v2.x-dev",
+        "spatie/image-optimizer": "^1.7",
+        "artisansweb/image-optimizer": "^0.0.1"
     }
 }

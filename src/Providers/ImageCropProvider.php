@@ -3,9 +3,20 @@
 namespace Imagecrop\Mehmeteminsayim\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Imagecrop\Mehmeteminsayim\IBase;
+use Spatie\Image\Image;
+
 
 class ImageCropProvider extends ServiceProvider
 {
+
+    public function register()
+    {
+        $this->app->singleton(Image::class, function ($app) {
+            return new Image();
+        });
+    }
+
     /**
      * Bootstrap services.
      *
@@ -25,4 +36,5 @@ class ImageCropProvider extends ServiceProvider
                 $this->app->databasePath("database/migrations".now()->format('Y_m_d_His').'create_package_table.php'),
         ],'imagecrop-migrations');
     }
+
 }

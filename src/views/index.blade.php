@@ -84,6 +84,7 @@
         or
         <input type="file" name="image" id="image" accept="image/*">
     </label>
+    <span style="display: none" class="text-danger error-file-text">This error</span>
 </div>
 
 <div class="modal fade" id="cropImageModal" tabindex="-1" aria-labelledby="cropImageModalLabel" aria-hidden="true">
@@ -94,17 +95,48 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="img-container">
-                    <img id="imageToCrop" src="#" alt="Image to crop">
+                <div class="row">
+                    <div class="col-md-12 drawInputArea" style="display: none">
+                        <input type="color" id="colorPicker">
+                        <input type="range" id="lineWidth" min="1" max="10">
+                    </div>
+                    <div class="col-md-9">
+                        <div class="img-container imageInputArea">
+                            <img id="imageToCrop" src="#" class="" alt="Image to crop">
+                        </div>
+                        <canvas id="drawingCanvas"></canvas>
+                    </div>
+                    <div class="col-md-3 imageInputArea">
+                        <div class="mb-3">
+                            <label for="exampleInputEmail1" class="form-label">Width</label>
+                            <input type="number" class="form-control" id="imageWidth">
+                        </div>
+                        <div class="mb-3">
+                            <label for="exampleInputEmail1" class="form-label">Height</label>
+                            <input type="number" class="form-control" id="imageHeight">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="exampleInputEmail1" class="form-label">Optimize Image</label>
+                            <select class="form-select" aria-label="Default select example" name="is_optimize" id="isOptimize">
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="cropAndUpload">Crop and Upload</button>
+                <button type="button" class="btn btn-primary" id="cropAndUpload">Apply Crop</button>
+                <button style="display: none;" type="button" class="btn btn-primary finalSubmitButton">Draw Upload</button>
             </div>
         </div>
     </div>
 </div>
+
+<input type="hidden" name="lastRecordId">
+<input type="hidden" name="lastRecordFilename">
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -116,7 +148,6 @@
         const fileInput = document.getElementById("image")
 
         dropContainer.addEventListener("dragover", (e) => {
-            // prevent default to allow drop
             e.preventDefault()
         }, false)
 
@@ -141,7 +172,6 @@
         let cropper;
         let croppedImageDataURL;
 
-        // Initialize the Cropper.js instance when the modal is shown
         $('#cropImageModal').on('shown.bs.modal', function() {
             cropper = new Cropper($('#imageToCrop')[0], {
                 aspectRatio: 1 / 1,
@@ -150,50 +180,71 @@
             });
         });
 
-        // Destroy the Cropper.js instance when the modal is hidden
         $('#cropImageModal').on('hidden.bs.modal', function() {
             cropper.destroy();
             cropper = null;
         });
 
-        // Show the image cropping modal when an image is selected
         $('#image').on('change', function(event) {
             const file = event.target.files[0];
             const fileReader = new FileReader();
 
             fileReader.onload = function(e) {
+                const image = new Image();
+                let width = null;
+                let height = null;
+                image.onload = function() {
+                     width = image.width;
+                     height = image.height;
+                    $("#imageWidth").val(width);
+                    $("#imageHeight").val(height);
+                };
+                image.src = e.target.result;
                 $('#imageToCrop').attr('src', e.target.result);
+                $('#imageToCrop').css("width",width / 2);
+                $('#imageToCrop').css("height",height / 2);
                 $('#cropImageModal').modal('show');
             };
 
             fileReader.readAsDataURL(file);
         });
 
-        // Handle the "Crop and Upload" button click
         $('#cropAndUpload').on('click', function() {
             croppedImageDataURL = cropper.getCroppedCanvas().toDataURL();
-            uploadCroppedImage();
-            $('#cropImageModal').modal('hide');
+            //uploadCroppedImage();
+            //$('#cropImageModal').modal('hide');
+            $(".drawInputArea").show();
+            $(".imageInputArea").hide()
+            $("#drawingCanvas").show();
+            $(".finalSubmitButton").show();
+            $("#cropAndUpload").hide();
         });
 
-        // Upload the cropped image to the server
         function uploadCroppedImage() {
+            //Not usage this function by emin
             let  csrfToken = "{{ csrf_token() }}";;
 
             const formData = new FormData();
             formData.append('_token', csrfToken);
             formData.append('image', dataURLtoFile(croppedImageDataURL, 'cropped-image.png'));
+            formData.append('width',$("#imageWidth").val());
+            formData.append('height',$("#imageHeight").val());
+            formData.append('optimize',$("#isOptimize").val())
 
             axios.post('{{ route('upload1') }}',formData).then((res)=>{
                 if (res.data.status === 'success') {
-                    $('#croppedImage').attr('src', '{{ env('APP_UPLOADS_URL') }}/' + res.data.filename);
-                    $('#croppedImage').show();
+
+                }else{
+                    $(".error-file-text").show();
+                    $(".error-file-text").html(res.data.message);
                 }
+            }).catch((err)=>{
+                $(".error-file-text").show();
+                $(".error-file-text").html(err);
             })
 
         }
 
-        // Helper function to convert a data URL to a File object
         function dataURLtoFile(dataURL, filename) {
             const arr = dataURL.split(',');
             const mime = arr[0].match(/:(.*?);/)[1];
@@ -207,6 +258,69 @@
 
             return new File([u8arr], filename, { type: mime });
         }
+
+        let finalImageDataURL = null;
+        $('#cropAndUpload').on('click', function() {
+            let croppedCanvas = cropper.getCroppedCanvas();
+            let drawingCanvas = document.getElementById('drawingCanvas');
+            let ctx = drawingCanvas.getContext('2d');
+
+            drawingCanvas.width = croppedCanvas.width;
+            drawingCanvas.height = croppedCanvas.height;
+
+            ctx.drawImage(croppedCanvas, 0, 0);
+
+            let drawing = false;
+            drawingCanvas.addEventListener('mousedown', (e) => {
+                drawing = true;
+                ctx.beginPath();
+                ctx.moveTo(e.offsetX, e.offsetY);
+            });
+            drawingCanvas.addEventListener('mousemove', (e) => {
+                if (drawing) {
+                    ctx.lineTo(e.offsetX, e.offsetY);
+                    ctx.stroke();
+                }
+            });
+            drawingCanvas.addEventListener('mouseup', () => {
+                drawing = false;
+                finalImageDataURL = drawingCanvas.toDataURL();
+            });
+
+            document.getElementById('colorPicker').addEventListener('change', (e) => {
+                ctx.strokeStyle = e.target.value;
+            });
+            document.getElementById('lineWidth').addEventListener('change', (e) => {
+                ctx.lineWidth = e.target.value;
+            });
+        });
+
+        $(document).on("click",".finalSubmitButton",function (){
+            let  csrfToken = "{{ csrf_token() }}";;
+
+            const formData = new FormData();
+            formData.append('_token', csrfToken);
+            formData.append('image', dataURLtoFile(finalImageDataURL, 'cropped-image.png'));
+            formData.append('width',$("#imageWidth").val());
+            formData.append('height',$("#imageHeight").val());
+            formData.append('optimize',$("#isOptimize").val())
+
+            axios.post('{{ route('upload1') }}',formData).then((res)=>{
+                if (res.data.status === 'success') {
+                    $("input[name=lastRecordId]").val(res.data.record.id);
+                    $("input[name=lastRecordFilename]").val(res.data.record.filename)
+                    $('#cropImageModal').modal('hide');
+                }else{
+                    $(".error-file-text").show();
+                    $(".error-file-text").html(res.data.message);
+                }
+            }).catch((err)=>{
+                $(".error-file-text").show();
+                $(".error-file-text").html(err);
+            })
+        })
+
+
     });
 </script>
 
