@@ -18,7 +18,7 @@ class ImageCropController
                 'image' => 'required|image|max:2048',
             ]);
 
-            $image = $request->file('imae')
+            $image = $request->file('image');
             $size = $image->getSize();
             $filename = time() . '.' . $image->getClientOriginalExtension();
 
