@@ -18,7 +18,7 @@ class ImageCropController
                 'image' => 'required|image|max:2048',
             ]);
 
-            $image = $request->file('image');
+            $image = $request->file('imae')
             $size = $image->getSize();
             $filename = time() . '.' . $image->getClientOriginalExtension();
 
@@ -33,7 +33,7 @@ class ImageCropController
             ]);
 
             if ($request->filled("width")){
-                
+
             }
 
 
