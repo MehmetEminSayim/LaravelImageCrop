@@ -104,7 +104,11 @@
                         <div class="img-container imageInputArea">
                             <img id="imageToCrop" src="#" class="" alt="Image to crop">
                         </div>
-                        <canvas id="drawingCanvas"></canvas>
+                        <div class="row justify-content-center d-flex">
+                            <div class="col-md-6">
+                                <canvas id="drawingCanvas"></canvas>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-md-3 imageInputArea">
                         <div class="mb-3">
@@ -265,10 +269,22 @@
             let drawingCanvas = document.getElementById('drawingCanvas');
             let ctx = drawingCanvas.getContext('2d');
 
-            drawingCanvas.width = croppedCanvas.width;
-            drawingCanvas.height = croppedCanvas.height;
+            const fixedWidth = 500; // İstediğiniz genişlik
+            const fixedHeight = 500; // İstediğiniz yükseklik
 
-            ctx.drawImage(croppedCanvas, 0, 0);
+            let hRatio = fixedWidth / croppedCanvas.width;
+            let vRatio = fixedHeight / croppedCanvas.height;
+            let ratio = Math.min(hRatio, vRatio);
+
+            let centerShift_x = (fixedWidth - croppedCanvas.width * ratio) / 2;
+            let centerShift_y = (fixedHeight - croppedCanvas.height * ratio) / 2;
+
+            drawingCanvas.width = fixedWidth;
+            drawingCanvas.height = fixedHeight;
+
+            ctx.clearRect(0, 0, fixedWidth, fixedHeight);
+            ctx.drawImage(croppedCanvas, 0, 0, croppedCanvas.width, croppedCanvas.height,
+                centerShift_x, centerShift_y, croppedCanvas.width * ratio, croppedCanvas.height * ratio);
 
             let drawing = false;
             drawingCanvas.addEventListener('mousedown', (e) => {
